@@ -10,7 +10,7 @@ Use Claude Code from anywhere with end-to-end encryption.
 
 <div align="center">
   
-[📱 **iOS App**](https://apps.apple.com/us/app/happy-claude-code-client/id6748571505) • [🤖 **Android App**](https://play.google.com/store/apps/details?id=com.ex3ndr.happy) • [🌐 **Web App**](https://app.happy.engineering) • [🎥 **See a Demo**](https://youtu.be/GCS0OG9QMSE) • [⭐ **Star on GitHub**](https://github.com/slopus/happy)
+[📱 **iOS App**](https://github.com/Cemberk/happy/releases/latest) • [🤖 **Android App**](https://github.com/Cemberk/happy/releases/latest) • [🌐 **Web App**](https://github.com/Cemberk/happy/releases/latest) • [🎥 **See a Demo**](https://youtu.be/GCS0OG9QMSE) • [⭐ **Star on GitHub**](https://github.com/Cemberk/happy)
 
 </div>
 
@@ -24,7 +24,7 @@ Step 1: Get Mobile App
 
 **📱 Download from our releases:**
 
-[**📦 Latest Release**](https://github.com/slopus/happy/releases/latest) • [**🏗️ Build Status**](https://github.com/slopus/happy/actions)
+[**📦 Latest Release**](https://github.com/Cemberk/happy/releases/latest) • [**🏗️ Build Status**](https://github.com/Cemberk/happy/actions)
 
 *iOS & Android apps are built automatically from source code*
 
@@ -35,7 +35,7 @@ Step 2: One-Command Setup
 </h3>
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/slopus/happy/main/setup-complete-system.sh | bash
+curl -sSL https://raw.githubusercontent.com/Cemberk/happy/main/setup-complete-system.sh | bash
 ```
 
 <h3 align="center">
@@ -80,8 +80,8 @@ Run `happy` instead of `claude` and scan the QR code with your phone. Your devic
 
 ## 📦 Project Components
 
-- **[happy-cli](https://github.com/slopus/happy-cli)** - Command-line interface for Claude Code
-- **[happy-server](https://github.com/slopus/happy-server)** - Backend server for encrypted sync
+- **[happy-cli](https://github.com/Cemberk/happy-cli)** - Command-line interface for Claude Code
+- **[happy-server](https://github.com/Cemberk/happy-server)** - Backend server for encrypted sync
 - **happy-coder** - This mobile client (you are here)
 
 ## 🏠 Who We Are

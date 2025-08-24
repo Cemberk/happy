@@ -132,7 +132,7 @@ setup_nebula() {
 download_mobile_releases() {
     print_step "5" "Checking for mobile app releases"
     
-    local latest_release_url="https://api.github.com/repos/slopus/happy/releases/latest"
+    local latest_release_url="https://api.github.com/repos/Cemberk/happy/releases/latest"
     local latest_release=$(curl -s "$latest_release_url" 2>/dev/null || echo "")
     
     if [[ -z "$latest_release" ]] || echo "$latest_release" | grep -q "Not Found"; then
@@ -140,10 +140,10 @@ download_mobile_releases() {
         print_warning "Mobile apps are being built automatically by GitHub Actions"
         print_warning ""
         print_warning "Status: Building first release (v1.0.0-nebula)"
-        print_warning "Check build progress: https://github.com/slopus/happy/actions"
+        print_warning "Check build progress: https://github.com/Cemberk/happy/actions"
         print_warning ""
         print_warning "Once complete, mobile apps will be available at:"
-        print_warning "  📱 https://github.com/slopus/happy/releases/latest"
+        print_warning "  📱 https://github.com/Cemberk/happy/releases/latest"
         print_warning ""
         print_warning "For now, you can continue with CLI setup."
         print_warning "The mobile apps will be ready in a few minutes!"
@@ -177,7 +177,7 @@ download_mobile_releases() {
     if [[ -z "$android_url" && -z "$ios_url" ]]; then
         print_warning "No pre-built mobile apps found in releases"
         print_warning "Mobile apps are built automatically when tags are pushed"
-        print_warning "Check: https://github.com/slopus/happy/releases"
+        print_warning "Check: https://github.com/Cemberk/happy/releases"
     fi
 }
 
@@ -282,13 +282,13 @@ display_final_instructions() {
         echo "   📱 Android: Install $RELEASES_DIR/Happy-Android.apk"
     else
         echo "   📱 Android: Download from GitHub releases (building now)"
-        echo "      https://github.com/slopus/happy/releases/latest"
+        echo "      https://github.com/Cemberk/happy/releases/latest"
     fi
     if [[ -f "$RELEASES_DIR/Happy-iOS.zip" ]]; then
         echo "   📱 iOS: Extract and install from $RELEASES_DIR/Happy-iOS.zip"
     else
         echo "   📱 iOS: Download from GitHub releases (building now)"
-        echo "      https://github.com/slopus/happy/releases/latest"
+        echo "      https://github.com/Cemberk/happy/releases/latest"
     fi
     echo ""
     echo "3. Connect your mobile device:"
