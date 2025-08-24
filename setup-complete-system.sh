@@ -137,12 +137,16 @@ download_mobile_releases() {
     
     if [[ -z "$latest_release" ]] || echo "$latest_release" | grep -q "Not Found"; then
         print_warning "No GitHub releases found yet"
-        print_warning "Mobile apps will be available after first release is published"
+        print_warning "Mobile apps are being built automatically by GitHub Actions"
         print_warning ""
-        print_warning "For now, you can:"
-        print_warning "  1. Build from source: See happy/README.md"
-        print_warning "  2. Wait for automated releases to be published"
-        print_warning "  3. Check: https://github.com/slopus/happy/releases"
+        print_warning "Status: Building first release (v1.0.0-nebula)"
+        print_warning "Check build progress: https://github.com/slopus/happy/actions"
+        print_warning ""
+        print_warning "Once complete, mobile apps will be available at:"
+        print_warning "  📱 https://github.com/slopus/happy/releases/latest"
+        print_warning ""
+        print_warning "For now, you can continue with CLI setup."
+        print_warning "The mobile apps will be ready in a few minutes!"
         return
     fi
     
@@ -277,12 +281,14 @@ display_final_instructions() {
     if [[ -f "$RELEASES_DIR/Happy-Android.apk" ]]; then
         echo "   📱 Android: Install $RELEASES_DIR/Happy-Android.apk"
     else
-        echo "   📱 Android: Install from Google Play (search 'Happy Coder')"
+        echo "   📱 Android: Download from GitHub releases (building now)"
+        echo "      https://github.com/slopus/happy/releases/latest"
     fi
     if [[ -f "$RELEASES_DIR/Happy-iOS.zip" ]]; then
         echo "   📱 iOS: Extract and install from $RELEASES_DIR/Happy-iOS.zip"
     else
-        echo "   📱 iOS: Install from App Store (search 'Happy Coder')"
+        echo "   📱 iOS: Download from GitHub releases (building now)"
+        echo "      https://github.com/slopus/happy/releases/latest"
     fi
     echo ""
     echo "3. Connect your mobile device:"
