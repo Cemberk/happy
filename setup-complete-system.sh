@@ -14,6 +14,10 @@ echo "• Nebula mesh networking (peer-to-peer)"
 echo "• Mobile app setup (QR codes for pairing)"
 echo "• Local server components"
 echo ""
+echo "🔒 SECURITY NOTICE:"
+echo "This system creates certificates and keys for secure networking."
+echo "All data stays on your devices - no cloud servers involved."
+echo ""
 
 # Configuration
 INSTALL_DIR="$HOME/.happy-system"

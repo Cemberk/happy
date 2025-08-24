@@ -2,10 +2,17 @@
 
 # Happy Nebula Deployment Script
 # Deploys Happy with Nebula mesh networking for peer-to-peer operation
+#
+# 🔒 SECURITY WARNING:
+# This script generates certificates and private keys.
+# Review the script before running and ensure you understand what it does.
+# All keys are stored locally and should be kept secure.
 
 set -e
 
 echo "🚀 Starting Happy Nebula deployment..."
+echo "🔒 This script will generate cryptographic keys and certificates"
+echo "    stored locally in ~/.happy-nebula/"
 
 # Configuration
 NEBULA_DIR="$HOME/.happy-nebula"

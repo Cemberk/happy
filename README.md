@@ -62,7 +62,7 @@ Happy now uses **Nebula mesh networking** for secure peer-to-peer connections. Y
 
 Run `happy` instead of `claude` and scan the QR code with your phone. Your devices are now connected!
 
-## ?
+## 🔒 Why Peer-to-Peer?
 
 | **Before (Cloud)** | **Now (P2P)** |
 |---|---|
@@ -71,6 +71,15 @@ Run `happy` instead of `claude` and scan the QR code with your phone. Your devic
 | 🌍 Internet always required | 📡 Works offline after setup |
 | 🔓 Third-party server access | 🛡️ Impossible to intercept |
 | 🐌 Cloud latency delays | ⚡ Direct connection speed |
+
+### 🔒 Security Features
+- **Certificate-based authentication** using X25519 cryptography  
+- **Double encryption**: Nebula network layer + Happy application layer
+- **Zero-trust networking** - only authorized devices can connect
+- **Forward secrecy** with ephemeral key exchange
+- **Local-only operation** - works completely offline after initial setup
+
+⚠️ **Security Notice**: This system generates cryptographic certificates stored in `~/.happy-nebula/`. Keep these secure.
 
 **Plus all the original features:**
 - 📱 **Mobile access to Claude Code** - Control Claude from anywhere
@@ -83,6 +92,18 @@ Run `happy` instead of `claude` and scan the QR code with your phone. Your devic
 - **[happy-cli](https://github.com/Cemberk/happy-cli)** - Command-line interface for Claude Code
 - **[happy-server](https://github.com/Cemberk/happy-server)** - Backend server for encrypted sync
 - **happy-coder** - This mobile client (you are here)
+
+## ⚠️ Security Checklist
+
+Before running setup scripts, please review:
+
+- ✅ **Script contents** - Read `setup-complete-system.sh` before executing
+- ✅ **Certificate storage** - Understand that keys are stored in `~/.happy-nebula/`
+- ✅ **Network configuration** - Review Nebula configuration for your network
+- ✅ **Firewall rules** - Ensure UDP port 4242 is properly configured
+- ✅ **Access controls** - Only share QR codes with devices you trust
+
+**This system is designed for privacy**, but security depends on proper setup and usage.
 
 ## 🏠 Who We Are
 
