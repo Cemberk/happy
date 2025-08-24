@@ -150,7 +150,8 @@ download_mobile_releases() {
         print_warning "  📱 https://github.com/Cemberk/happy/releases/latest"
         print_warning ""
         print_warning "For now, you can continue with CLI setup."
-        print_warning "The mobile apps will be ready in a few minutes!"
+        print_warning "Android APK will be ready in a few minutes!"
+        print_warning "iOS requires local building due to code signing requirements."
         return
     fi
     
@@ -291,8 +292,8 @@ display_final_instructions() {
     if [[ -f "$RELEASES_DIR/Happy-iOS.zip" ]]; then
         echo "   📱 iOS: Extract and install from $RELEASES_DIR/Happy-iOS.zip"
     else
-        echo "   📱 iOS: Download from GitHub releases (building now)"
-        echo "      https://github.com/Cemberk/happy/releases/latest"
+        echo "   📱 iOS: Build locally with Xcode (code signing required)"
+        echo "      cd /path/to/happy && yarn ios:build:release"
     fi
     echo ""
     echo "3. Connect your mobile device:"
