@@ -1,0 +1,46 @@
+FROM node:18-alpine
+
+# Install dependencies for Nebula networking
+RUN apk add --no-cache \
+    curl \
+    ca-certificates \
+    iptables \
+    iproute2
+
+# Create app directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY yarn.lock ./
+
+# Install dependencies
+RUN yarn install --production --frozen-lockfile
+
+# Copy source code
+COPY sources/ ./sources/
+COPY tsconfig.json ./
+
+# Build the application
+RUN yarn build
+
+# Create non-root user
+RUN addgroup -g 1001 -S happy && \
+    adduser -S happy -u 1001
+
+# Create directories for logs and config
+RUN mkdir -p /app/logs /app/config /app/certs && \
+    chown -R happy:happy /app
+
+# Switch to non-root user
+USER happy
+
+# Expose relay port
+EXPOSE 3001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:3001/health || exit 1
+
+# Start the local relay server
+CMD ["node", "dist/nebula/LocalRelay.js"]

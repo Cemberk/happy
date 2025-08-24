@@ -1,4 +1,4 @@
-import { io, Socket } from 'socket.io-client';
+import { nebulaSocket } from '@/nebula/NebulaSocket';
 import { TokenStorage } from '@/auth/tokenStorage';
 import { ApiEncryption } from './apiEncryption';
 
@@ -25,14 +25,9 @@ export type SyncSocketListener = (state: SyncSocketState) => void;
 
 class ApiSocket {
 
-    // State
-    private socket: Socket | null = null;
+    // State - now delegates to NebulaSocket
     private config: SyncSocketConfig | null = null;
     private encryption: ApiEncryption | null = null;
-    private messageHandlers: Map<string, (data: any) => void> = new Map();
-    private reconnectedListeners: Set<() => void> = new Set();
-    private statusListeners: Set<(status: 'disconnected' | 'connecting' | 'connected' | 'error') => void> = new Set();
-    private currentStatus: 'disconnected' | 'connecting' | 'connected' | 'error' = 'disconnected';
 
     //
     // Initialization
@@ -41,42 +36,19 @@ class ApiSocket {
     initialize(config: SyncSocketConfig, encryption: ApiEncryption) {
         this.config = config;
         this.encryption = encryption;
-        this.connect();
+        nebulaSocket.initialize(config, encryption);
     }
 
     //
-    // Connection Management
+    // Connection Management (delegated to NebulaSocket)
     //
 
     connect() {
-        if (!this.config || this.socket) {
-            return;
-        }
-
-        this.updateStatus('connecting');
-
-        this.socket = io(this.config.endpoint, {
-            path: '/v1/updates',
-            auth: {
-                token: this.config.token,
-                clientType: 'user-scoped' as const
-            },
-            transports: ['websocket'],
-            reconnection: true,
-            reconnectionDelay: 1000,
-            reconnectionDelayMax: 5000,
-            reconnectionAttempts: Infinity
-        });
-
-        this.setupEventHandlers();
+        nebulaSocket.connect();
     }
 
     disconnect() {
-        if (this.socket) {
-            this.socket.disconnect();
-            this.socket = null;
-        }
-        this.updateStatus('disconnected');
+        nebulaSocket.disconnect();
     }
 
     //
@@ -84,15 +56,11 @@ class ApiSocket {
     //
 
     onReconnected = (listener: () => void) => {
-        this.reconnectedListeners.add(listener);
-        return () => this.reconnectedListeners.delete(listener);
+        return nebulaSocket.onReconnected(listener);
     };
 
     onStatusChange = (listener: (status: 'disconnected' | 'connecting' | 'connected' | 'error') => void) => {
-        this.statusListeners.add(listener);
-        // Immediately notify with current status
-        listener(this.currentStatus);
-        return () => this.statusListeners.delete(listener);
+        return nebulaSocket.onStatusChange(listener);
     };
 
     //
@@ -100,38 +68,26 @@ class ApiSocket {
     //
 
     onMessage(event: string, handler: (data: any) => void) {
-        this.messageHandlers.set(event, handler);
-        return () => this.messageHandlers.delete(event);
+        return nebulaSocket.onMessage(event, handler);
     }
 
     offMessage(event: string, handler: (data: any) => void) {
-        this.messageHandlers.delete(event);
+        nebulaSocket.offMessage(event, handler);
     }
 
     /**
      * listernerId is either sessionId or machineId
      */
     async rpc<R, A>(listernerId: string, method: string, params: A): Promise<R> {
-        const result = await this.socket!.emitWithAck('rpc-call', {
-            method: `${listernerId}:${method}`,
-            params: this.encryption!.encryptRaw(params)
-        });
-        if (result.ok) {
-            return this.encryption?.decryptRaw(result.result) as R;
-        }
-        throw new Error('RPC call failed');
+        return nebulaSocket.rpc<R, A>(listernerId, method, params);
     }
 
     send(event: string, data: any) {
-        this.socket!.emit(event, data);
-        return true;
+        return nebulaSocket.send(event, data);
     }
 
     async emitWithAck<T = any>(event: string, data: any): Promise<T> {
-        if (!this.socket) {
-            throw new Error('Socket not connected');
-        }
-        return await this.socket.emitWithAck(event, data);
+        return nebulaSocket.emitWithAck<T>(event, data);
     }
 
     //
@@ -139,25 +95,7 @@ class ApiSocket {
     //
 
     async request(path: string, options?: RequestInit): Promise<Response> {
-        if (!this.config) {
-            throw new Error('SyncSocket not initialized');
-        }
-
-        const credentials = await TokenStorage.getCredentials();
-        if (!credentials) {
-            throw new Error('No authentication credentials');
-        }
-
-        const url = `${this.config.endpoint}${path}`;
-        const headers = {
-            'Authorization': `Bearer ${credentials.token}`,
-            ...options?.headers
-        };
-
-        return fetch(url, {
-            ...options,
-            headers
-        });
+        return nebulaSocket.request(path, options);
     }
 
     //
@@ -167,70 +105,24 @@ class ApiSocket {
     updateToken(newToken: string) {
         if (this.config && this.config.token !== newToken) {
             this.config.token = newToken;
-
-            if (this.socket) {
-                this.disconnect();
-                this.connect();
-            }
+            nebulaSocket.updateToken(newToken);
         }
     }
 
     //
-    // Private Methods
+    // Nebula-specific methods (optional, for debugging)
     //
 
-    private updateStatus(status: 'disconnected' | 'connecting' | 'connected' | 'error') {
-        if (this.currentStatus !== status) {
-            this.currentStatus = status;
-            this.statusListeners.forEach(listener => listener(status));
-        }
+    getNebulaStatus() {
+        return nebulaSocket.getNebulaStatus();
     }
 
-    private setupEventHandlers() {
-        if (!this.socket) return;
+    getPeers() {
+        return nebulaSocket.getPeers();
+    }
 
-        // Connection events
-        this.socket.on('connect', () => {
-            // console.log('🔌 SyncSocket: Connected, recovered: ' + this.socket?.recovered);
-            // console.log('🔌 SyncSocket: Socket ID:', this.socket?.id);
-            this.updateStatus('connected');
-            if (!this.socket?.recovered) {
-                this.reconnectedListeners.forEach(listener => listener());
-            }
-        });
-
-        this.socket.on('disconnect', (reason) => {
-            // console.log('🔌 SyncSocket: Disconnected', reason);
-            this.updateStatus('disconnected');
-        });
-
-        // Error events
-        this.socket.on('connect_error', (error) => {
-            // console.error('🔌 SyncSocket: Connection error', error);
-            this.updateStatus('error');
-        });
-
-        this.socket.on('error', (error) => {
-            // console.error('🔌 SyncSocket: Error', error);
-            this.updateStatus('error');
-        });
-
-        // Authentication response
-        this.socket.on('auth', (data) => {
-            // console.log('🔌 SyncSocket: Auth response:', data);
-        });
-
-        // Message handling
-        this.socket.onAny((event, data) => {
-            // console.log(`📥 SyncSocket: Received event '${event}':`, JSON.stringify(data).substring(0, 200));
-            const handler = this.messageHandlers.get(event);
-            if (handler) {
-                // console.log(`📥 SyncSocket: Calling handler for '${event}'`);
-                handler(data);
-            } else {
-                // console.log(`📥 SyncSocket: No handler registered for '${event}'`);
-            }
-        });
+    isLighthouse() {
+        return nebulaSocket.isLighthouse();
     }
 }
 

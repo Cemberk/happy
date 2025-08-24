@@ -1,0 +1,131 @@
+version: '3.8'
+
+services:
+  # Nebula Lighthouse service
+  nebula-lighthouse:
+    image: slackhq/nebula:latest
+    container_name: happy-nebula-lighthouse
+    restart: unless-stopped
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    volumes:
+      - ./nebula-config/lighthouse.yml:/etc/nebula/config.yml:ro
+      - ./nebula-certs:/etc/nebula/certs:ro
+      - ./nebula-logs:/var/log/nebula
+    environment:
+      - NEBULA_CONFIG=/etc/nebula/config.yml
+    healthcheck:
+      test: ["CMD", "nebula", "-test", "-config", "/etc/nebula/config.yml"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Happy Local Relay service
+  happy-local-relay:
+    build:
+      context: .
+      dockerfile: Dockerfile.relay
+    container_name: happy-local-relay
+    restart: unless-stopped
+    depends_on:
+      nebula-lighthouse:
+        condition: service_healthy
+    ports:
+      - "3001:3001"  # Local relay port
+    volumes:
+      - ./nebula-certs:/app/certs:ro
+      - ./happy-config:/app/config:ro
+      - ./happy-logs:/app/logs
+    environment:
+      - NODE_ENV=production
+      - NEBULA_MODE=true
+      - LIGHTHOUSE_IP=10.42.0.1
+      - RELAY_PORT=3001
+      - LOG_LEVEL=info
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Happy Web Interface (optional)
+  happy-web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: happy-web
+    restart: unless-stopped
+    depends_on:
+      happy-local-relay:
+        condition: service_healthy
+    ports:
+      - "8080:8080"  # Web interface port
+    volumes:
+      - ./happy-config:/app/config:ro
+      - ./happy-logs:/app/logs
+    environment:
+      - NODE_ENV=production
+      - NEBULA_MODE=true
+      - RELAY_URL=http://happy-local-relay:3001
+      - WEB_PORT=8080
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Watchtower for automatic updates (optional)
+  watchtower:
+    image: containrrr/watchtower
+    container_name: happy-watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=3600
+      - WATCHTOWER_INCLUDE_STOPPED=true
+    command: happy-nebula-lighthouse happy-local-relay happy-web
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  nebula-config:
+    driver: local
+  nebula-certs:
+    driver: local
+  nebula-logs:
+    driver: local
+  happy-config:
+    driver: local
+  happy-logs:
+    driver: local
+
+networks:
+  default:
+    name: happy-nebula
+    driver: bridge

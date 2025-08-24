@@ -5,12 +5,19 @@ import * as Updates from 'expo-updates';
 import { clearPersistence } from '@/sync/persistence';
 import { Platform } from 'react-native';
 import { trackLogout } from '@/track';
+import { NebulaAuth } from '@/nebula/NebulaAuth';
+import { isNebulaMode } from '@/sync/serverConfig';
 
 interface AuthContextType {
     isAuthenticated: boolean;
     credentials: AuthCredentials | null;
     login: (token: string, secret: string) => Promise<void>;
     logout: () => Promise<void>;
+    // Nebula-specific methods
+    setupAsLighthouse: () => Promise<{ qrData: string; credentials: AuthCredentials }>;
+    joinNetwork: (qrData: string) => Promise<{ success: boolean; error?: string }>;
+    generateAddDeviceQR: () => Promise<string>;
+    getNebulaStatus: () => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,7 +41,13 @@ export function AuthProvider({ children, initialCredentials }: { children: React
     const logout = async () => {
         trackLogout();
         clearPersistence();
-        await TokenStorage.removeCredentials();
+        
+        // Use Nebula auth logout if in Nebula mode
+        if (isNebulaMode()) {
+            await NebulaAuth.logout();
+        } else {
+            await TokenStorage.removeCredentials();
+        }
         
         // Update React state to ensure UI consistency
         setCredentials(null);
@@ -52,6 +65,33 @@ export function AuthProvider({ children, initialCredentials }: { children: React
         }
     };
 
+    // Nebula-specific methods
+    const setupAsLighthouse = async () => {
+        const result = await NebulaAuth.setupAsLighthouse();
+        setCredentials(result.credentials);
+        setIsAuthenticated(true);
+        await syncCreate(result.credentials);
+        return result;
+    };
+
+    const joinNetwork = async (qrData: string) => {
+        const result = await NebulaAuth.joinNetwork(qrData);
+        if (result.success && result.credentials) {
+            setCredentials(result.credentials);
+            setIsAuthenticated(true);
+            await syncCreate(result.credentials);
+        }
+        return result;
+    };
+
+    const generateAddDeviceQR = async () => {
+        return await NebulaAuth.generateAddDeviceQR();
+    };
+
+    const getNebulaStatus = async () => {
+        return await NebulaAuth.getAuthStatus();
+    };
+
     return (
         <AuthContext.Provider
             value={{
@@ -59,6 +99,10 @@ export function AuthProvider({ children, initialCredentials }: { children: React
                 credentials,
                 login,
                 logout,
+                setupAsLighthouse,
+                joinNetwork,
+                generateAddDeviceQR,
+                getNebulaStatus,
             }}
         >
             {children}

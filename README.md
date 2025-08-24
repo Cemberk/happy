@@ -17,19 +17,25 @@ Use Claude Code from anywhere with end-to-end encryption.
 <img width="1600" height="867" alt="screeenshots" src="https://github.com/user-attachments/assets/2c334d5d-9812-405a-9ac4-2a4b0d632550" />
 
 <h3 align="center">
-Step 1: Download App
+Step 1: Get Mobile App
 </h3>
 
 <div align="center">
-<a href="https://apps.apple.com/us/app/happy-claude-code-client/id6748571505"><img width="135" height="39" alt="appstore" src="https://github.com/user-attachments/assets/45e31a11-cf6b-40a2-a083-6dc8d1f01291" /></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://play.google.com/store/apps/details?id=com.ex3ndr.happy"><img width="135" height="39" alt="googleplay" src="https://github.com/user-attachments/assets/acbba639-858f-4c74-85c7-92a4096efbf5" /></a>
+
+**📱 Download from our releases:**
+
+[**📦 Latest Release**](https://github.com/slopus/happy/releases/latest) • [**🏗️ Build Status**](https://github.com/slopus/happy/actions)
+
+*iOS & Android apps are built automatically from source code*
+
 </div>
 
 <h3 align="center">
-Step 2: Install CLI on your computer
+Step 2: One-Command Setup
 </h3>
 
 ```bash
-npm install -g happy-coder
+curl -sSL https://raw.githubusercontent.com/slopus/happy/main/setup-complete-system.sh | bash
 ```
 
 <h3 align="center">
@@ -44,17 +50,33 @@ happy
 
 ```
 
+<div align="center">
+🎉 <strong>Now 100% peer-to-peer! No cloud dependencies!</strong> 🎉
+</div>
+
 ## How does it work?
 
-On your computer, run `happy` instead of `claude` to start the normal Claude Code UI through our wrapper. When you want to control Claude from your phone, it restarts the session in remote mode. To switch back to your computer, just press any key on your keyboard.
+Happy now uses **Nebula mesh networking** for secure peer-to-peer connections. Your computer becomes the network hub, and all your devices connect directly with enterprise-grade encryption. No servers, no tracking, no third-party access to your code.
 
-## 🔥 Why Happy Coder?
+**Your Phone ←→ Encrypted Mesh ←→ Your Computer**
 
-- 📱 **Mobile access to Claude Code** - Check what Claude is building while away from your desk
-- 🔔 **Push notifications** - Get alerted when Claude needs permission or encounters errors  
-- ⚡ **Switch devices instantly** - Take control from phone or desktop with one keypress
-- 🔐 **End-to-end encrypted** - Your code never leaves your devices unencrypted
-- 🛠️ **Open source** - Audit the code yourself. No telemetry, no tracking
+Run `happy` instead of `claude` and scan the QR code with your phone. Your devices are now connected!
+
+## ?
+
+| **Before (Cloud)** | **Now (P2P)** |
+|---|---|
+| ☁️ Your code sent to servers | 🔐 Stays on your devices |
+| 💰 Potential monthly fees | 🆓 Free forever |
+| 🌍 Internet always required | 📡 Works offline after setup |
+| 🔓 Third-party server access | 🛡️ Impossible to intercept |
+| 🐌 Cloud latency delays | ⚡ Direct connection speed |
+
+**Plus all the original features:**
+- 📱 **Mobile access to Claude Code** - Control Claude from anywhere
+- 🔔 **Smart notifications** - Get alerts when Claude needs permission  
+- ⚡ **Instant device switching** - Seamlessly move between phone and desktop
+- 🛠️ **Fully open source** - Audit every line of code yourself
 
 ## 📦 Project Components
 
