@@ -8,6 +8,12 @@ const SERVER_KEY = 'custom-server-url';
 const NEBULA_MODE_KEY = 'nebula-mode';
 
 export function getServerUrl(): string {
+    // Check for user-configured server URL first (runtime configuration)
+    const customServerUrl = serverConfigStorage.getString(SERVER_KEY);
+    if (customServerUrl) {
+        return customServerUrl;
+    }
+
     // In Nebula mode, return the lighthouse IP instead of a cloud URL
     if (isNebulaMode()) {
         const nebulaStatus = NebulaManager.getStatus();
@@ -21,10 +27,8 @@ export function getServerUrl(): string {
         }
     }
     
-    // Fallback to legacy cloud mode (for testing/transition)
-    return serverConfigStorage.getString(SERVER_KEY) || 
-           process.env.EXPO_PUBLIC_HAPPY_SERVER_URL || 
-           'nebula://local'; // Indicate Nebula mode
+    // Fallback order: build-time env -> default localhost
+    return process.env.EXPO_PUBLIC_HAPPY_SERVER_URL || 'http://localhost:3005';
 }
 
 export function setServerUrl(url: string | null): void {
@@ -40,6 +44,46 @@ export function setServerUrl(url: string | null): void {
         serverConfigStorage.delete(SERVER_KEY);
         // Default to Nebula mode
         setNebulaMode(true);
+    }
+}
+
+/**
+ * Get the current server URL for display in settings
+ */
+export function getCurrentServerUrl(): string {
+    return getServerUrl();
+}
+
+/**
+ * Reset server URL to default (localhost:3005)
+ */
+export function resetServerUrl(): void {
+    serverConfigStorage.delete(SERVER_KEY);
+    setNebulaMode(false);
+}
+
+/**
+ * Test connection to a server URL
+ */
+export async function testServerConnection(url?: string): Promise<{ success: boolean; error?: string }> {
+    const testUrl = url || getServerUrl();
+    
+    try {
+        const response = await fetch(`${testUrl}/health`, {
+            method: 'GET',
+            timeout: 5000
+        });
+        
+        if (response.ok) {
+            return { success: true };
+        } else {
+            return { success: false, error: `Server responded with status ${response.status}` };
+        }
+    } catch (error) {
+        return { 
+            success: false, 
+            error: error instanceof Error ? error.message : 'Connection failed' 
+        };
     }
 }
 
@@ -62,6 +106,10 @@ export function setNebulaMode(enabled: boolean): void {
  * Check if Nebula mode is enabled
  */
 export function isNebulaMode(): boolean {
+    // Check if we have EXPO_PUBLIC_HAPPY_SERVER_URL set - if so, disable Nebula mode
+    if (process.env.EXPO_PUBLIC_HAPPY_SERVER_URL && process.env.EXPO_PUBLIC_HAPPY_SERVER_URL.startsWith('http')) {
+        return false;
+    }
     // Default to true (Nebula is the new default)
     return serverConfigStorage.getBoolean(NEBULA_MODE_KEY) ?? true;
 }

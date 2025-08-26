@@ -5,7 +5,7 @@ import { Text } from '@/components/StyledText';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
-import { useAuth } from '@/auth/AuthContext';
+import { useAuth } from '@/auth/LocalAuthContext';
 import { Typography } from "@/constants/Typography";
 import { Item } from '@/components/Item';
 import { ItemGroup } from '@/components/ItemGroup';
@@ -13,7 +13,7 @@ import { ItemList } from '@/components/ItemList';
 import { useConnectTerminal } from '@/hooks/useConnectTerminal';
 import { useEntitlement, useLocalSettingMutable } from '@/sync/storage';
 import { sync } from '@/sync/sync';
-import { isUsingCustomServer } from '@/sync/serverConfig';
+import { isUsingCustomServer, getCurrentServerUrl, setServerUrl, testServerConnection, resetServerUrl } from '@/sync/serverConfig';
 import { trackPaywallButtonClicked } from '@/track';
 import { Modal } from '@/modal';
 import { useMultiClick } from '@/hooks/useMultiClick';
@@ -87,6 +87,7 @@ export default React.memo(function SettingsScreen() {
     const [devModeEnabled, setDevModeEnabled] = useLocalSettingMutable('devModeEnabled');
     const isPro = __DEV__ || useEntitlement('pro');
     const isCustomServer = isUsingCustomServer();
+    const currentServerUrl = getCurrentServerUrl();
     const allMachines = useAllMachines();
 
     const { connectTerminal, connectWithUrl, isLoading } = useConnectTerminal();
@@ -115,6 +116,113 @@ export default React.memo(function SettingsScreen() {
         } else if (result.purchased) {
             console.log('Purchase successful!');
         }
+    };
+
+    // Server configuration handlers
+    const handleServerConfig = async () => {
+        if (Platform.OS === 'ios') {
+            Alert.prompt(
+                'Server Configuration',
+                `Current: ${currentServerUrl}\n\nEnter new server URL (leave empty for default):`,
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                        text: 'Save',
+                        onPress: (url?: string) => {
+                            setServerUrl(url?.trim() || null);
+                            Modal.alert('Server Updated', 'Server configuration updated successfully');
+                        }
+                    }
+                ],
+                'plain-text',
+                '',
+                'http://localhost:3005'
+            );
+        } else {
+            // For Android, show a custom modal
+            Modal.show({
+                component: ({ onClose }) => {
+                    const [url, setUrl] = React.useState('');
+                    return (
+                        <View style={{ padding: 20, backgroundColor: theme.colors.surface, borderRadius: 12, minWidth: 300 }}>
+                            <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 8 }}>
+                                Server Configuration
+                            </Text>
+                            <Text style={{ fontSize: 14, color: theme.colors.textSecondary, marginBottom: 16 }}>
+                                Current: {currentServerUrl}{'\n\n'}Enter new server URL (leave empty for default):
+                            </Text>
+                            <TextInput
+                                style={{
+                                    borderWidth: 1,
+                                    borderColor: theme.colors.divider,
+                                    borderRadius: 8,
+                                    padding: 12,
+                                    fontSize: 14,
+                                    marginBottom: 20,
+                                    color: theme.colors.input.text,
+                                    backgroundColor: theme.colors.input.background
+                                }}
+                                value={url}
+                                onChangeText={setUrl}
+                                placeholder="http://localhost:3005"
+                                placeholderTextColor={theme.colors.input.placeholder}
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                                autoFocus
+                            />
+                            <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+                                <Pressable
+                                    onPress={onClose}
+                                    style={{ paddingVertical: 8, paddingHorizontal: 16, marginRight: 8 }}
+                                >
+                                    <Text style={{ color: '#007AFF', fontSize: 16 }}>Cancel</Text>
+                                </Pressable>
+                                <Pressable
+                                    onPress={() => {
+                                        setServerUrl(url.trim() || null);
+                                        Modal.alert('Server Updated', 'Server configuration updated successfully');
+                                        onClose();
+                                    }}
+                                    style={{ paddingVertical: 8, paddingHorizontal: 16 }}
+                                >
+                                    <Text style={{ color: '#007AFF', fontSize: 16, fontWeight: '600' }}>
+                                        Save
+                                    </Text>
+                                </Pressable>
+                            </View>
+                        </View>
+                    );
+                }
+            });
+        }
+    };
+
+    const handleTestConnection = async () => {
+        Modal.alert('Testing Connection', 'Testing server connection...');
+        const result = await testServerConnection();
+        if (result.success) {
+            Modal.alert('Connection Successful', 'Server is running and accessible');
+        } else {
+            Modal.alert('Connection Failed', result.error || 'Could not connect to server');
+        }
+    };
+
+    const handleResetServer = () => {
+        Modal.alert(
+            'Reset Server Configuration',
+            'This will reset the server URL to default. Are you sure?',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Reset',
+                    style: 'destructive',
+                    onPress: () => {
+                        resetServerUrl();
+                        Modal.alert('Reset Complete', 'Server configuration reset to default');
+                    }
+                }
+            ]
+        );
     };
 
     // Use the multi-click hook for version clicks
@@ -200,6 +308,30 @@ export default React.memo(function SettingsScreen() {
                     />
                 </ItemGroup>
             )}
+
+            {/* Server Configuration */}
+            <ItemGroup title="Server Configuration">
+                <Item
+                    title="Configure Server"
+                    subtitle={`Current: ${currentServerUrl}`}
+                    icon={<Ionicons name="server-outline" size={29} color="#5856D6" />}
+                    onPress={handleServerConfig}
+                />
+                <Item
+                    title="Test Connection"
+                    subtitle="Check if server is accessible"
+                    icon={<Ionicons name="pulse-outline" size={29} color="#34C759" />}
+                    onPress={handleTestConnection}
+                    showChevron={false}
+                />
+                <Item
+                    title="Reset to Default"
+                    subtitle="Reset server configuration"
+                    icon={<Ionicons name="refresh-outline" size={29} color="#FF9500" />}
+                    onPress={handleResetServer}
+                    showChevron={false}
+                />
+            </ItemGroup>
 
             {/* Support Us */}
             <ItemGroup>
@@ -287,7 +419,7 @@ export default React.memo(function SettingsScreen() {
             )}
 
             {/* About */}
-            <ItemGroup title="About" footer="Happy Coder is a Claude Code mobile client. It's fully end-to-end encrypted and your account is stored only on your device. Not affiliated with Anthropic.">
+            <ItemGroup title="About" footer="Happy is a privacy-first local AI assistant. No accounts, no external services, complete data sovereignty. All data stays on your device.">
                 <Item
                     title="GitHub"
                     icon={<Ionicons name="logo-github" size={29} color={theme.colors.text} />}

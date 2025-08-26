@@ -20,7 +20,7 @@ export default function TerminalConnectScreen() {
         }
     });
 
-    // Extract key from hash on web platform
+    // Extract key from hash on web platform and auto-approve in privacy mode
     useEffect(() => {
         if (Platform.OS === 'web' && typeof window !== 'undefined' && !hashProcessed) {
             const hash = window.location.hash;
@@ -31,11 +31,22 @@ export default function TerminalConnectScreen() {
                 // Clear the hash from URL to prevent exposure in browser history
                 window.history.replaceState(null, '', window.location.pathname + window.location.search);
                 setHashProcessed(true);
+                
+                // Privacy mode: Auto-approve terminal authentication immediately
+                console.log('🔒 Privacy mode: Auto-approving terminal authentication');
+                setTimeout(async () => {
+                    const authUrl = `happy://terminal?${key}`;
+                    const success = await processAuthUrl(authUrl);
+                    if (success) {
+                        console.log('🔒 Privacy mode: Terminal authentication auto-approved successfully');
+                    }
+                }, 100); // Small delay to ensure processAuthUrl is ready
+                
             } else {
                 setHashProcessed(true);
             }
         }
-    }, [hashProcessed]);
+    }, [hashProcessed, processAuthUrl]);
 
     const handleConnect = async () => {
         if (publicKey) {

@@ -17,4 +17,4 @@ export {
 
 // This will be resolved to either revenueCat.native.ts or revenueCat.web.ts
 // based on the platform
-export { default as RevenueCat } from './revenueCat';
+export { revenueCat as default } from './revenueCat';

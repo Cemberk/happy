@@ -15,11 +15,13 @@ export function initializeTracking(anonymousUserId: string) {
  * Auth events
  */
 export function trackAccountCreated() {
-    tracking?.capture('account_created');
+    // Privacy mode: No account creation - local only
+    console.log('🔒 Privacy mode: Local session started');
 }
 
 export function trackAccountRestored() {
-    tracking?.capture('account_restored');
+    // Privacy mode: No account restoration - local only  
+    console.log('🔒 Privacy mode: Local session restored');
 }
 
 export function trackLogout() {
@@ -46,30 +48,30 @@ export function trackPermissionResponse(allowed: boolean) {
 }
 
 /**
- * Paywall events
+ * Paywall events - Privacy mode: No paywalls in local-only operation
  */
 export function trackPaywallButtonClicked() {
-    tracking?.capture('paywall_button_clicked');
+    console.log('🔒 Privacy mode: No paywall - all features free locally');
 }
 
 export function trackPaywallPresented() {
-    tracking?.capture('paywall_presented');
+    console.log('🔒 Privacy mode: No paywall - all features free locally');
 }
 
 export function trackPaywallPurchased() {
-    tracking?.capture('paywall_purchased');
+    console.log('🔒 Privacy mode: No paywall - all features free locally');
 }
 
 export function trackPaywallCancelled() {
-    tracking?.capture('paywall_cancelled');
+    console.log('🔒 Privacy mode: No paywall - all features free locally');
 }
 
 export function trackPaywallRestored() {
-    tracking?.capture('paywall_restored');
+    console.log('🔒 Privacy mode: No paywall - all features free locally');
 }
 
 export function trackPaywallError(error: string) {
-    tracking?.capture('paywall_error', { error });
+    console.log('🔒 Privacy mode: No paywall - all features free locally');
 }
 
 /**

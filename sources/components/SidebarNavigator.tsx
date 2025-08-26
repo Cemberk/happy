@@ -1,4 +1,4 @@
-import { useAuth } from '@/auth/AuthContext';
+import { useAuth } from '@/auth/LocalAuthContext';
 import * as React from 'react';
 import { Drawer } from 'expo-router/drawer';
 import { useIsTablet } from '@/utils/responsive';

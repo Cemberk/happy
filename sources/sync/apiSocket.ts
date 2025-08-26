@@ -1,4 +1,4 @@
-import { nebulaSocket } from '@/nebula/NebulaSocket';
+import { realSocket } from './realSocket';
 import { TokenStorage } from '@/auth/tokenStorage';
 import { ApiEncryption } from './apiEncryption';
 
@@ -25,7 +25,7 @@ export type SyncSocketListener = (state: SyncSocketState) => void;
 
 class ApiSocket {
 
-    // State - now delegates to NebulaSocket
+    // State - now delegates to realSocket
     private config: SyncSocketConfig | null = null;
     private encryption: ApiEncryption | null = null;
 
@@ -36,19 +36,19 @@ class ApiSocket {
     initialize(config: SyncSocketConfig, encryption: ApiEncryption) {
         this.config = config;
         this.encryption = encryption;
-        nebulaSocket.initialize(config, encryption);
+        realSocket.initialize(config, encryption);
     }
 
     //
-    // Connection Management (delegated to NebulaSocket)
+    // Connection Management (delegated to realSocket)
     //
 
     connect() {
-        nebulaSocket.connect();
+        realSocket.connect();
     }
 
     disconnect() {
-        nebulaSocket.disconnect();
+        realSocket.disconnect();
     }
 
     //
@@ -56,11 +56,11 @@ class ApiSocket {
     //
 
     onReconnected = (listener: () => void) => {
-        return nebulaSocket.onReconnected(listener);
+        return realSocket.onReconnected(listener);
     };
 
     onStatusChange = (listener: (status: 'disconnected' | 'connecting' | 'connected' | 'error') => void) => {
-        return nebulaSocket.onStatusChange(listener);
+        return realSocket.onStatusChange(listener);
     };
 
     //
@@ -68,26 +68,26 @@ class ApiSocket {
     //
 
     onMessage(event: string, handler: (data: any) => void) {
-        return nebulaSocket.onMessage(event, handler);
+        return realSocket.onMessage(event, handler);
     }
 
     offMessage(event: string, handler: (data: any) => void) {
-        nebulaSocket.offMessage(event, handler);
+        realSocket.offMessage(event, handler);
     }
 
     /**
      * listernerId is either sessionId or machineId
      */
     async rpc<R, A>(listernerId: string, method: string, params: A): Promise<R> {
-        return nebulaSocket.rpc<R, A>(listernerId, method, params);
+        return realSocket.rpc<R, A>(listernerId, method, params);
     }
 
     send(event: string, data: any) {
-        return nebulaSocket.send(event, data);
+        return realSocket.send(event, data);
     }
 
     async emitWithAck<T = any>(event: string, data: any): Promise<T> {
-        return nebulaSocket.emitWithAck<T>(event, data);
+        return realSocket.emitWithAck<T>(event, data);
     }
 
     //
@@ -95,7 +95,7 @@ class ApiSocket {
     //
 
     async request(path: string, options?: RequestInit): Promise<Response> {
-        return nebulaSocket.request(path, options);
+        return realSocket.request(path, options);
     }
 
     //
@@ -105,7 +105,7 @@ class ApiSocket {
     updateToken(newToken: string) {
         if (this.config && this.config.token !== newToken) {
             this.config.token = newToken;
-            nebulaSocket.updateToken(newToken);
+            realSocket.updateToken(newToken);
         }
     }
 
@@ -114,15 +114,15 @@ class ApiSocket {
     //
 
     getNebulaStatus() {
-        return nebulaSocket.getNebulaStatus();
+        return realSocket.getNebulaStatus();
     }
 
     getPeers() {
-        return nebulaSocket.getPeers();
+        return realSocket.getPeers();
     }
 
     isLighthouse() {
-        return nebulaSocket.isLighthouse();
+        return realSocket.isLighthouse();
     }
 }
 

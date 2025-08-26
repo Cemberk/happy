@@ -813,7 +813,7 @@ export default function InputStylesDemo() {
                             borderColor: 'rgba(255, 255, 255, 0.2)',
                             paddingHorizontal: 16,
                             paddingVertical: 12,
-                            backdropFilter: 'blur(10px)',
+                            // backdropFilter: 'blur(10px)', // Not supported in React Native
                         }}>
                             <TextInput
                                 style={{ 

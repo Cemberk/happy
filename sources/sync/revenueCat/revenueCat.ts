@@ -1,202 +1,83 @@
-import Purchases, { 
-    CustomerInfo as NativeCustomerInfo,
-    PurchasesOfferings,
-    PurchasesStoreProduct,
-    LOG_LEVEL
-} from 'react-native-purchases';
-import RevenueCatUI, { PAYWALL_RESULT } from 'react-native-purchases-ui';
-import { 
-    RevenueCatInterface, 
-    CustomerInfo, 
-    Product, 
-    Offerings, 
-    PurchaseResult,
-    RevenueCatConfig,
-    LogLevel,
-    PaywallResult,
-    PaywallOptions
-} from './types';
+/**
+ * RevenueCat Stub - Privacy-first replacement
+ * Removed for complete data sovereignty
+ */
 
-// Map native log levels to our common ones
-const logLevelMap = {
-    [LogLevel.VERBOSE]: LOG_LEVEL.VERBOSE,
-    [LogLevel.DEBUG]: LOG_LEVEL.DEBUG,
-    [LogLevel.INFO]: LOG_LEVEL.INFO,
-    [LogLevel.WARN]: LOG_LEVEL.WARN,
-    [LogLevel.ERROR]: LOG_LEVEL.ERROR
-};
+// Stub types for compatibility
+export interface PurchasesEntitlement {
+    identifier: string;
+    isActive: boolean;
+}
 
-class RevenueCatNative implements RevenueCatInterface {
-    configure(config: RevenueCatConfig): void {
-        Purchases.configure({
-            apiKey: config.apiKey,
-            appUserID: config.appUserID,
-            useAmazon: config.useAmazon || false
-        });
+export interface PurchasesOffering {
+    identifier: string;
+    availablePackages: any[];
+}
+
+export interface PurchasesCustomerInfo {
+    entitlements: { active: Record<string, PurchasesEntitlement> };
+}
+
+export interface CustomerInfo {
+    entitlements: { active: Record<string, PurchasesEntitlement> };
+}
+
+export interface RevenueCatInterface {
+    configure(): Promise<void>;
+    getCustomerInfo(): Promise<CustomerInfo>;
+    getOfferings(): Promise<PurchasesOffering[]>;
+    purchasePackage(pkg: any): Promise<void>;
+    restorePurchases(): Promise<CustomerInfo>;
+    isPremium(): boolean;
+    showPaywallIfNeeded(): boolean;
+}
+
+class LocalPurchaseManager implements RevenueCatInterface {
+    // All purchases disabled for privacy-first approach
+    async configure() {
+        console.log('💳 Purchase system disabled for privacy - using local-only mode');
     }
 
     async getCustomerInfo(): Promise<CustomerInfo> {
-        const nativeInfo = await Purchases.getCustomerInfo();
-        return this.transformCustomerInfo(nativeInfo);
-    }
-
-    async getOfferings(): Promise<Offerings> {
-        const nativeOfferings = await Purchases.getOfferings();
-        return this.transformOfferings(nativeOfferings);
-    }
-
-    async getProducts(productIds: string[]): Promise<Product[]> {
-        const nativeProducts = await Purchases.getProducts(productIds);
-        return nativeProducts.map(p => this.transformProduct(p));
-    }
-
-    async purchaseStoreProduct(product: Product): Promise<PurchaseResult> {
-        // For native, we need to get the actual native product object
-        const nativeProducts = await Purchases.getProducts([product.identifier]);
-        if (nativeProducts.length === 0) {
-            throw new Error(`Product ${product.identifier} not found`);
-        }
-        
-        const result = await Purchases.purchaseStoreProduct(nativeProducts[0]);
+        // Return empty entitlements - app runs in free mode
         return {
-            customerInfo: this.transformCustomerInfo(result.customerInfo)
+            entitlements: { active: {} }
         };
     }
 
-    async syncPurchases(): Promise<void> {
-        await Purchases.syncPurchases();
+    async getOfferings(): Promise<PurchasesOffering[]> {
+        // No offerings in privacy mode
+        return [];
     }
 
-    setLogLevel(level: LogLevel): void {
-        const nativeLevel = logLevelMap[level];
-        if (nativeLevel !== undefined) {
-            Purchases.setLogLevel(nativeLevel);
-        }
+    async purchasePackage() {
+        console.log('💳 Purchases disabled in privacy mode');
+        throw new Error('Purchases disabled in privacy-first mode');
     }
 
-    async presentPaywall(options?: PaywallOptions): Promise<PaywallResult> {
-        try {
-            // If offering is provided, we need to get the native offering object
-            let nativeOffering = undefined;
-            if (options?.offering) {
-                // Get all native offerings and find the matching one
-                const nativeOfferings = await Purchases.getOfferings();
-                nativeOffering = nativeOfferings.all[options.offering.identifier];
-            }
-            
-            const nativeResult = await RevenueCatUI.presentPaywall(nativeOffering ? {
-                offering: nativeOffering
-            } : undefined);
-            
-            // Map native paywall result to our enum
-            switch (nativeResult) {
-                case PAYWALL_RESULT.NOT_PRESENTED:
-                    return PaywallResult.NOT_PRESENTED;
-                case PAYWALL_RESULT.ERROR:
-                    return PaywallResult.ERROR;
-                case PAYWALL_RESULT.CANCELLED:
-                    return PaywallResult.CANCELLED;
-                case PAYWALL_RESULT.PURCHASED:
-                    return PaywallResult.PURCHASED;
-                case PAYWALL_RESULT.RESTORED:
-                    return PaywallResult.RESTORED;
-                default:
-                    return PaywallResult.ERROR;
-            }
-        } catch (error) {
-            console.error('Error presenting paywall:', error);
-            return PaywallResult.ERROR;
-        }
+    async restorePurchases() {
+        console.log('💳 Purchase restoration disabled in privacy mode');
+        return this.getCustomerInfo();
     }
 
-    async presentPaywallIfNeeded(options?: PaywallOptions & { requiredEntitlementIdentifier: string }): Promise<PaywallResult> {
-        try {
-            // If offering is provided, we need to get the native offering object
-            let nativeOffering = undefined;
-            if (options?.offering) {
-                // Get all native offerings and find the matching one
-                const nativeOfferings = await Purchases.getOfferings();
-                nativeOffering = nativeOfferings.all[options.offering.identifier];
-            }
-            
-            const nativeResult = await RevenueCatUI.presentPaywallIfNeeded({
-                offering: nativeOffering,
-                requiredEntitlementIdentifier: options?.requiredEntitlementIdentifier || 'pro'
-            });
-            
-            // Map native paywall result to our enum
-            switch (nativeResult) {
-                case PAYWALL_RESULT.NOT_PRESENTED:
-                    return PaywallResult.NOT_PRESENTED;
-                case PAYWALL_RESULT.ERROR:
-                    return PaywallResult.ERROR;
-                case PAYWALL_RESULT.CANCELLED:
-                    return PaywallResult.CANCELLED;
-                case PAYWALL_RESULT.PURCHASED:
-                    return PaywallResult.PURCHASED;
-                case PAYWALL_RESULT.RESTORED:
-                    return PaywallResult.RESTORED;
-                default:
-                    return PaywallResult.ERROR;
-            }
-        } catch (error) {
-            console.error('Error presenting paywall if needed:', error);
-            return PaywallResult.ERROR;
-        }
+    isPremium(): boolean {
+        // In privacy mode, all features are available locally
+        return true;
     }
 
-    // Transform native types to our common types
-    private transformCustomerInfo(native: NativeCustomerInfo): CustomerInfo {
-        return {
-            activeSubscriptions: native.activeSubscriptions || {},
-            entitlements: {
-                all: Object.entries(native.entitlements.all || {}).reduce((acc, [key, entitlement]) => {
-                    acc[key] = {
-                        isActive: entitlement.isActive,
-                        identifier: entitlement.identifier
-                    };
-                    return acc;
-                }, {} as Record<string, { isActive: boolean; identifier: string }>)
-            },
-            originalAppUserId: native.originalAppUserId,
-            requestDate: new Date(native.requestDate)
-        };
-    }
-
-    private transformProduct(native: PurchasesStoreProduct): Product {
-        return {
-            identifier: native.identifier,
-            priceString: native.priceString,
-            price: native.price,
-            currencyCode: native.currencyCode,
-            title: native.title,
-            description: native.description
-        };
-    }
-
-    private transformOfferings(native: PurchasesOfferings): Offerings {
-        const transformPackages = (packages: any[]) => {
-            return packages.map(pkg => ({
-                identifier: pkg.identifier,
-                packageType: pkg.packageType,
-                product: this.transformProduct(pkg.storeProduct)
-            }));
-        };
-
-        return {
-            current: native.current ? {
-                identifier: native.current.identifier,
-                availablePackages: transformPackages(Object.values(native.current.availablePackages))
-            } : null,
-            all: Object.entries(native.all || {}).reduce((acc, [key, offering]) => {
-                acc[key] = {
-                    identifier: offering.identifier,
-                    availablePackages: transformPackages(Object.values(offering.availablePackages))
-                };
-                return acc;
-            }, {} as Record<string, any>)
-        };
+    showPaywallIfNeeded(): boolean {
+        // Never show paywall in privacy mode
+        return false;
     }
 }
 
-export default new RevenueCatNative();
+export const revenueCat = new LocalPurchaseManager();
+
+// Export compatibility functions
+export const configureRevenueCat = () => revenueCat.configure();
+export const getCustomerInfo = () => revenueCat.getCustomerInfo();
+export const getOfferings = () => revenueCat.getOfferings();
+export const purchasePackage = () => revenueCat.purchasePackage();
+export const restorePurchases = () => revenueCat.restorePurchases();
+export const isPremium = () => revenueCat.isPremium();
+export const showPaywallIfNeeded = () => revenueCat.showPaywallIfNeeded();

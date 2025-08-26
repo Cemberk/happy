@@ -82,13 +82,32 @@ export function useSessionStatus(session: Session): SessionStatus {
  * Returns the last segment of the path, or 'unknown' if no path is available.
  */
 export function getSessionName(session: Session): string {
+    // Debug logging to understand what metadata we have
+    if (typeof window !== 'undefined' && window.console) {
+        console.log('🔍 getSessionName debug:', {
+            sessionId: session.id,
+            hasMetadata: !!session.metadata,
+            metadataKeys: session.metadata ? Object.keys(session.metadata) : [],
+            path: session.metadata?.path,
+            summary: session.metadata?.summary
+        });
+    }
+    
     if (session.metadata?.summary) {
         return session.metadata.summary.text;
-    } else if (session.metadata) {
+    } else if (session.metadata?.path) {
         const segments = session.metadata.path.split('/').filter(Boolean);
-        const lastSegment = segments.pop()!;
-        return lastSegment;
+        const lastSegment = segments.pop();
+        if (lastSegment) {
+            return lastSegment;
+        }
     }
+    
+    // Fallback to session ID prefix if we have no useful metadata
+    if (session.id) {
+        return `Session ${session.id.slice(-8)}`;
+    }
+    
     return 'unknown';
 }
 

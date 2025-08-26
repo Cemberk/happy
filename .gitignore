@@ -43,3 +43,6 @@ yarn-error.*
 .plan
 
 CLAUDE.local.md
+
+# Nebula VPN binaries (users should download from official releases)
+nebula/

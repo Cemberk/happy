@@ -46,8 +46,15 @@ class NebulaManagerImpl {
                 this.config = savedConfig;
                 await this.startNebula();
             } else {
-                // First run - need to create CA and node cert
-                throw new Error('No Nebula configuration found. Use setupAsCA() or joinNetwork()');
+                // Check if we're in privacy mode (connecting to localhost)
+                const serverUrl = process.env.EXPO_PUBLIC_HAPPY_SERVER_URL || 'http://localhost:3005';
+                if (serverUrl.includes('localhost') || serverUrl.includes('127.0.0.1')) {
+                    console.log('🔒 Privacy mode: Setting up local-only Nebula configuration');
+                    await this.setupPrivacyModeConfig();
+                } else {
+                    // First run - need to create CA and node cert
+                    throw new Error('No Nebula configuration found. Use setupAsCA() or joinNetwork()');
+                }
             }
         } catch (error) {
             console.error('Failed to initialize Nebula:', error);
@@ -339,6 +346,39 @@ class NebulaManagerImpl {
         } catch {
             return null;
         }
+    }
+
+    /**
+     * Set up privacy mode configuration for local-only operation
+     */
+    private async setupPrivacyModeConfig(): Promise<void> {
+        console.log('🔒 Privacy mode: Creating local-only Nebula configuration');
+        
+        // Create a minimal local-only configuration
+        const privacyConfig = {
+            networkName: 'privacy-local',
+            isLighthouse: true,
+            ip: '10.42.0.1',
+            lighthouses: [],
+            caCert: 'privacy-mode-mock-ca',
+            nodeCert: 'privacy-mode-mock-cert',
+            nodeKey: 'privacy-mode-mock-key',
+            staticHostMap: {}
+        };
+        
+        this.config = privacyConfig;
+        
+        // Save the privacy config
+        nebulaStorage.set('nebulaConfig', JSON.stringify(privacyConfig));
+        
+        // Set up connected status immediately for privacy mode
+        this.updateStatus({
+            status: 'connected',
+            peers: [],
+            ip: '10.42.0.1'
+        });
+        
+        console.log('🔒 Privacy mode: Local Nebula network configured');
     }
 
     /**

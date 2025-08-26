@@ -5,7 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as Fonts from 'expo-font';
 import { FontAwesome } from '@expo/vector-icons';
 import { AuthCredentials, TokenStorage } from '@/auth/tokenStorage';
-import { AuthProvider } from '@/auth/AuthContext';
+import { AuthProvider } from '@/auth/LocalAuthContext';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { initialWindowMetrics, SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,7 +14,7 @@ import { SidebarNavigator } from '@/components/SidebarNavigator';
 import sodium from 'react-native-libsodium';
 import { View, Platform } from 'react-native';
 import { ModalProvider } from '@/modal';
-import { PostHogProvider } from 'posthog-react-native';
+// PostHog removed for privacy - using local analytics
 import { tracking } from '@/track/tracking';
 import { syncRestore } from '@/sync/sync';
 import { useTrackScreens } from '@/track/useTrackScreens';
@@ -186,7 +186,7 @@ export default function RootLayout() {
         <SafeAreaProvider initialMetrics={initialWindowMetrics}>
             <KeyboardProvider>
                 <GestureHandlerRootView style={{ flex: 1 }}>
-                    <AuthProvider initialCredentials={initState.credentials}>
+                    <AuthProvider>
                         <ThemeProvider value={navigationTheme}>
                             <StatusBarProvider />
                             <ModalProvider>
@@ -204,13 +204,7 @@ export default function RootLayout() {
             </KeyboardProvider>
         </SafeAreaProvider>
     );
-    if (tracking) {
-        providers = (
-            <PostHogProvider client={tracking}>
-                {providers}
-            </PostHogProvider>
-        );
-    }
+    // PostHog provider removed for privacy - analytics now handled locally
 
     return (
         <>

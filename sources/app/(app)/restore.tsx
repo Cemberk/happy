@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth } from '@/auth/AuthContext';
+import { useAuth } from '@/auth/LocalAuthContext';
 import { RoundButton } from '@/components/RoundButton';
 import { Typography } from '@/constants/Typography';
 import { normalizeSecretKey } from '@/auth/secretKeyBackup';

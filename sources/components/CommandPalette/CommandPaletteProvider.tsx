@@ -5,7 +5,7 @@ import { Modal } from '@/modal';
 import { CommandPalette } from './CommandPalette';
 import { Command } from './types';
 import { useGlobalKeyboard } from '@/hooks/useGlobalKeyboard.web';
-import { useAuth } from '@/auth/AuthContext';
+import { useAuth } from '@/auth/LocalAuthContext';
 import { storage } from '@/sync/storage';
 import { useShallow } from 'zustand/react/shallow';
 
