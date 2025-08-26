@@ -156,17 +156,21 @@ class RealSocket {
             id: `rpc-${Date.now()}-${Math.random()}`
         };
 
+        console.log('[realSocket.rpc] Emitting RPC message:', rpcMessage);
+
         return new Promise((resolve, reject) => {
             const timeout = setTimeout(() => {
+                console.error('[realSocket.rpc] RPC timeout for message:', rpcMessage);
                 reject(new Error('RPC timeout'));
             }, 30000);
 
             this.socket!.emit('rpc', rpcMessage, (response: any) => {
                 clearTimeout(timeout);
-                if (response.error) {
+                console.log('[realSocket.rpc] Received RPC response:', response);
+                if (response && response.error) {
                     reject(new Error(response.error));
                 } else {
-                    resolve(response.result);
+                    resolve(response ? response.result : undefined);
                 }
             });
         });

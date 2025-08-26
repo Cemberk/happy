@@ -231,7 +231,9 @@ export async function sessionAbort(sessionId: string): Promise<void> {
  */
 export async function sessionAllow(sessionId: string, id: string, mode?: 'default' | 'acceptEdits' | 'bypassPermissions' | 'plan', allowedTools?: string[]): Promise<void> {
     const request: SessionPermissionRequest = { id, approved: true, mode, allowTools: allowedTools };
+    console.log('[ops.sessionAllow] Sending RPC permission request:', { sessionId, method: 'permission', request });
     await apiSocket.rpc(sessionId, 'permission', request);
+    console.log('[ops.sessionAllow] RPC permission request sent successfully');
 }
 
 /**
@@ -239,7 +241,9 @@ export async function sessionAllow(sessionId: string, id: string, mode?: 'defaul
  */
 export async function sessionDeny(sessionId: string, id: string, mode?: 'default' | 'acceptEdits' | 'bypassPermissions' | 'plan', allowedTools?: string[]): Promise<void> {
     const request: SessionPermissionRequest = { id, approved: false, mode, allowTools: allowedTools };
+    console.log('[ops.sessionDeny] Sending RPC permission request:', { sessionId, method: 'permission', request });
     await apiSocket.rpc(sessionId, 'permission', request);
+    console.log('[ops.sessionDeny] RPC permission request sent successfully');
 }
 
 /**

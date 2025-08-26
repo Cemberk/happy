@@ -29,7 +29,9 @@ export const PermissionFooter: React.FC<PermissionFooterProps> = ({ permission, 
 
         setLoadingButton('allow');
         try {
+            console.log('[PermissionFooter] Approving permission:', { sessionId, permissionId: permission.id });
             await sessionAllow(sessionId, permission.id);
+            console.log('[PermissionFooter] Permission approved successfully');
         } catch (error) {
             console.error('Failed to approve permission:', error);
         } finally {
@@ -77,7 +79,9 @@ export const PermissionFooter: React.FC<PermissionFooterProps> = ({ permission, 
 
         setLoadingButton('deny');
         try {
+            console.log('[PermissionFooter] Denying permission:', { sessionId, permissionId: permission.id });
             await sessionDeny(sessionId, permission.id);
+            console.log('[PermissionFooter] Permission denied successfully');
         } catch (error) {
             console.error('Failed to deny permission:', error);
         } finally {
