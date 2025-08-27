@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useRoute } from "@react-navigation/native";
 import { useState, useMemo, useCallback } from "react";
-import { View, ActivityIndicator, Platform } from "react-native";
+import { View, ActivityIndicator, Platform, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { getSessionName, useSessionStatus, getSessionAvatarId, formatPathRelativeToHome } from "@/utils/sessionUtils";
@@ -57,6 +57,7 @@ function SessionView({ sessionId, session }: { sessionId: string, session: Sessi
     const deviceType = useDeviceType();
     const isTablet = useIsTablet();
     const headerHeight = useHeaderHeight();
+    const { width: screenWidth } = useWindowDimensions();
     const { messages: messagesRecentFirst, isLoaded } = useSessionMessages(sessionId);
     const [message, setMessage] = useState('');
     const realtimeStatus = useRealtimeStatus();
