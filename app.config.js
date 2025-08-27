@@ -55,7 +55,6 @@ export default {
             ],
             edgeToEdgeEnabled: true,
             package: bundleId,
-            googleServicesFile: "./google-services.json",
             // Deep linking disabled for privacy-first fork
             // intentFilters: [
             //     {

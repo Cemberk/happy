@@ -431,7 +431,8 @@ export default React.memo(function SettingsScreen() {
                     icon={<Ionicons name="bug-outline" size={29} color="#FF3B30" />}
                     onPress={handleReportIssue}
                 />
-                <Item
+                {/* Privacy Policy disabled for privacy-first fork - no external links */}
+                {/* <Item
                     title="Privacy Policy"
                     icon={<Ionicons name="shield-checkmark-outline" size={29} color="#007AFF" />}
                     onPress={async () => {
@@ -441,8 +442,9 @@ export default React.memo(function SettingsScreen() {
                             await Linking.openURL(url);
                         }
                     }}
-                />
-                <Item
+                /> */}
+                {/* Terms of Service disabled for privacy-first fork - no external links */}
+                {/* <Item
                     title="Terms of Service"
                     icon={<Ionicons name="document-text-outline" size={29} color="#007AFF" />}
                     onPress={async () => {
@@ -452,8 +454,9 @@ export default React.memo(function SettingsScreen() {
                             await Linking.openURL(url);
                         }
                     }}
-                />
-                {Platform.OS === 'ios' && (
+                /> */}
+                {/* EULA disabled for privacy-first fork - no external links */}
+                {/* {Platform.OS === 'ios' && (
                     <Item
                         title="EULA"
                         icon={<Ionicons name="document-text-outline" size={29} color="#007AFF" />}
@@ -465,7 +468,7 @@ export default React.memo(function SettingsScreen() {
                             }
                         }}
                     />
-                )}
+                )} */}
             </ItemGroup>
 
         </ItemList>

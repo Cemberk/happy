@@ -164,7 +164,7 @@ class RealSocket {
                 reject(new Error('RPC timeout'));
             }, 30000);
 
-            this.socket!.emit('rpc', rpcMessage, (response: any) => {
+            this.socket!.emit('rpc-call', rpcMessage, (response: any) => {
                 clearTimeout(timeout);
                 console.log('[realSocket.rpc] Received RPC response:', response);
                 if (response && response.error) {

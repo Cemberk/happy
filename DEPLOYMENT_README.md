@@ -121,7 +121,7 @@ happy
 cd happy-server
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/happy?schema=public" \
 REDIS_URL="redis://localhost:6380" \
-HANDY_MASTER_SECRET="development-secret-key-please-change-in-production" \
+HANDY_MASTER_SECRET="EXAMPLE-development-secret-CHANGE-IN-PRODUCTION" \
 yarn start
 
 # Start Happy app (in separate terminal)
@@ -151,7 +151,7 @@ echo "help me understand this code" | happy
 cd happy-server
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/happy?schema=public" \
 REDIS_URL="redis://localhost:6380" \
-HANDY_MASTER_SECRET="development-secret-key-please-change-in-production" \
+HANDY_MASTER_SECRET="EXAMPLE-development-secret-CHANGE-IN-PRODUCTION" \
 yarn start
 # Keep this running in background
 ```
