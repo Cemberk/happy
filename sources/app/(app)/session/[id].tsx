@@ -7,7 +7,7 @@ import { useRouter } from "expo-router";
 import { getSessionName, useSessionStatus, getSessionAvatarId, formatPathRelativeToHome } from "@/utils/sessionUtils";
 import { useSession, useSessionMessages, useSessionUsage, useSetting, useRealtimeStatus, storage } from '@/sync/storage';
 import { sync } from '@/sync/sync';
-import { sessionAbort } from '@/sync/ops';
+import { sessionAbort, sessionSwitch } from '@/sync/ops';
 import { EmptyMessages } from '@/components/EmptyMessages';
 import { Pressable } from 'react-native';
 import { AgentInput } from '@/components/AgentInput';
@@ -29,6 +29,8 @@ import { useIsTablet } from '@/utils/responsive';
 import { gitStatusSync } from '@/sync/gitStatusSync';
 import { voiceHooks } from '@/realtime/hooks/voiceHooks';
 import { useUnistyles } from 'react-native-unistyles';
+import { MessageView } from '@/components/MessageView';
+import { ChatFooter } from '@/components/ChatFooter';
 
 
 export default React.memo(() => {
